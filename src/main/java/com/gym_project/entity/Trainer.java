@@ -24,4 +24,11 @@ public class Trainer extends User{
             orphanRemoval = true)
     private Set<Training> trainings;
 
+    @ManyToMany
+    @JoinTable(
+            name = "trainer_trainee",
+            joinColumns = @JoinColumn(name = "trainer_id"),
+            inverseJoinColumns = @JoinColumn(name = "trainee_id")
+    )
+    private Set<Trainee> trainees;
 }

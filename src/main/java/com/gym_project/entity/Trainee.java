@@ -23,4 +23,7 @@ public class Trainee extends User{
             orphanRemoval = true)
     private Set<Training> trainings;
 
+    @ManyToMany(mappedBy = "trainees")
+    private Set<Trainer> trainers;
+
 }
