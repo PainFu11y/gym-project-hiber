@@ -9,100 +9,30 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
-public class TraineeRepository {
+public interface TraineeRepository {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    void save(Trainee trainee);
 
-    @Transactional
-    public void save(Trainee trainee) {
-        entityManager.persist(trainee);
-    }
+    public Trainee update(Trainee trainee);
 
-    @Transactional
-    public Trainee update(Trainee trainee) {
-        return entityManager.merge(trainee);
-    }
+    void delete(Trainee trainee);
 
-    @Transactional
-    public void delete(Trainee trainee) {
-        entityManager.remove(entityManager.contains(trainee) ? trainee : entityManager.merge(trainee));
-    }
+    public Optional<Trainee> findById(Long id);
 
+    public List<Trainee> findAll();
 
-    @Transactional(readOnly = true)
-    public Optional<Trainee> findById(Long id) {
-        return Optional.ofNullable(entityManager.find(Trainee.class, id));
-    }
+    public List<Trainee> findByAddress(String address);
 
-    @Transactional(readOnly = true)
-    public List<Trainee> findAll() {
-        return entityManager.createQuery("SELECT t FROM Trainee t", Trainee.class)
-                .getResultList();
-    }
+    public Optional<Trainee> findByUsernameAndPassword(String username, String password);
 
+    public Optional<Trainee> findByUsername(String username);
 
-    @Transactional(readOnly = true)
-    public List<Trainee> findByAddress(String address) {
-        return entityManager.createQuery("SELECT t FROM Trainee t WHERE t.address = :address", Trainee.class)
-                .setParameter("address", address)
-                .getResultList();
-    }
+    public void changePassword(String username, String newPassword);
 
-    @Transactional(readOnly = true)
-    public Optional<Trainee> findByUsernameAndPassword(String username, String password) {
-        return entityManager.createQuery(
-                        "SELECT t FROM Trainee t WHERE t.username = :username AND t.password = :password", Trainee.class)
-                .setParameter("username", username)
-                .setParameter("password", password)
-                .getResultStream()
-                .findFirst();
-    }
+    public void activate(String username);
 
-    @Transactional(readOnly = true)
-    public Optional<Trainee> findByUsername(String username) {
-        return entityManager.createQuery(
-                        "SELECT t FROM Trainee t WHERE t.username = :username", Trainee.class)
-                .setParameter("username", username)
-                .getResultStream()
-                .findFirst();
-    }
+    public void deactivate(String username);
 
-    @Transactional
-    public void changePassword(String username, String newPassword) {
-        Optional<Trainee> traineeOpt = findByUsername(username);
-        if (traineeOpt.isPresent()) {
-            Trainee trainee = traineeOpt.get();
-            trainee.setPassword(newPassword);
-            entityManager.merge(trainee);
-        } else {
-            throw new IllegalArgumentException("Trainee not found with username " + username);
-        }
-    }
-
-    @Transactional
-    public void activate(String username) {
-        findByUsername(username).ifPresent(trainee -> {
-            trainee.setActive(true);
-            entityManager.merge(trainee);
-        });
-    }
-
-    @Transactional
-    public void deactivate(String username) {
-        findByUsername(username).ifPresent(trainee -> {
-            trainee.setActive(false);
-            entityManager.merge(trainee);
-        });
-    }
-
-    @Transactional
-    public void deleteByUsername(String username) {
-        findByUsername(username).ifPresent(trainee -> {
-            entityManager.remove(entityManager.contains(trainee) ? trainee : entityManager.merge(trainee));
-        });
-    }
-
+    public void deleteByUsername(String username);
 
 }
