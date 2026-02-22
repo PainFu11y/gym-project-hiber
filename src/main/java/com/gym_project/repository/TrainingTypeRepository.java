@@ -1,52 +1,21 @@
 package com.gym_project.repository;
 
 import com.gym_project.entity.TrainingType;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
-public class TrainingTypeRepository {
+public interface TrainingTypeRepository {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    public void save(TrainingType trainingType);
 
-    @Transactional
-    public void save(TrainingType trainingType) {
-        entityManager.persist(trainingType);
-    }
+    public TrainingType update(TrainingType trainingType);
 
-    @Transactional
-    public TrainingType update(TrainingType trainingType) {
-        return entityManager.merge(trainingType);
-    }
+    public void delete(TrainingType trainingType);
 
-    @Transactional
-    public void delete(TrainingType trainingType) {
-        entityManager.remove(entityManager.contains(trainingType) ? trainingType : entityManager.merge(trainingType));
-    }
+    public Optional<TrainingType> findById(Long id);
 
-    @Transactional(readOnly = true)
-    public Optional<TrainingType> findById(Long id) {
-        return Optional.ofNullable(entityManager.find(TrainingType.class, id));
-    }
+    public List<TrainingType> findAll();
 
-    @Transactional(readOnly = true)
-    public List<TrainingType> findAll() {
-        return entityManager.createQuery("SELECT t FROM TrainingType t", TrainingType.class)
-                .getResultList();
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<TrainingType> findByName(String trainingTypeName) {
-        return entityManager.createQuery(
-                        "SELECT t FROM TrainingType t WHERE t.trainingTypeName = :name", TrainingType.class)
-                .setParameter("name", trainingTypeName)
-                .getResultStream()
-                .findFirst();
-    }
+    public Optional<TrainingType> findByName(String trainingTypeName);
 }
