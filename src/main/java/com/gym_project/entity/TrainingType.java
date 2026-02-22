@@ -22,5 +22,4 @@ public class TrainingType {
 
     @OneToMany(mappedBy = "trainingType")
     private Set<Training> trainings;
-
 }
