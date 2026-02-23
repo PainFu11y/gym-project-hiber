@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Set;
+
 
 @Getter
 @Setter
@@ -16,4 +18,6 @@ public class TraineeResponseDto {
 
     private LocalDate dateOfBirth;
     private String address;
+
+    private Set<String> trainerUsernames;
 }

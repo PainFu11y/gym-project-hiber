@@ -15,4 +15,6 @@ public class TrainerResponseDto {
     private boolean active;
 
     private String specialization;
+
+    private Set<String> traineeUsernames;
 }
