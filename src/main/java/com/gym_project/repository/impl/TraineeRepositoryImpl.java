@@ -70,6 +70,19 @@ public class TraineeRepositoryImpl implements TraineeRepository {
                 .findFirst();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByUsername(String username) {
+
+        Long count = entityManager.createQuery(
+                        "SELECT COUNT(t) FROM Trainee t WHERE t.username = :username",
+                        Long.class)
+                .setParameter("username", username)
+                .getSingleResult();
+
+        return count > 0;
+    }
+
     @Transactional
     public void changePassword(String username, String newPassword) {
         Optional<Trainee> traineeOpt = findByUsername(username);
