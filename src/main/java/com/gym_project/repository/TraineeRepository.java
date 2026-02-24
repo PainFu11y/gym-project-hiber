@@ -29,6 +29,8 @@ public interface TraineeRepository {
 
     boolean existsByUsername(String username);
 
+    List<String> findUsernamesStartingWith(String prefix);
+
     void changePassword(String username, String newPassword);
 
     void activate(String username);

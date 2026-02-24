@@ -83,6 +83,15 @@ public class TraineeRepositoryImpl implements TraineeRepository {
         return count > 0;
     }
 
+    @Transactional(readOnly = true)
+    public List<String> findUsernamesStartingWith(String prefix) {
+        return entityManager.createQuery(
+                        "SELECT t.username FROM Trainee t WHERE t.username LIKE :prefix",
+                        String.class)
+                .setParameter("prefix", prefix + "%")
+                .getResultList();
+    }
+
     @Transactional
     public void changePassword(String username, String newPassword) {
         Optional<Trainee> traineeOpt = findByUsername(username);
