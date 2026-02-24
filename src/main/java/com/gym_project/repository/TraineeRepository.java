@@ -31,12 +31,12 @@ public interface TraineeRepository {
 
     List<String> findUsernamesStartingWith(String prefix);
 
-    void changePassword(String username, String newPassword);
-
     void activate(String username);
 
     void deactivate(String username);
 
     void deleteByUsername(String username);
+
+    void changePassword(String username, String newPassword);
 
 }

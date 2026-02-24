@@ -90,6 +90,14 @@ public class TrainerServiceImpl implements TrainerService {
         return TrainerMapper.toDto(trainer);
     }
 
+    @Override
+    public void changePassword(String username, String newPassword) {
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("Password cannot be blank");
+        }
+        trainerRepository.changePassword(username, newPassword);
+    }
+
     private void validateCreate(TrainerCreateDto dto) {
         if (dto.getFirstName() == null || dto.getFirstName().isBlank()) {
             throw new IllegalArgumentException("First name cannot be empty");
@@ -113,4 +121,5 @@ public class TrainerServiceImpl implements TrainerService {
             throw new IllegalArgumentException("Specialization cannot be blank");
         }
     }
+
 }

@@ -21,4 +21,6 @@ public interface TraineeService {
     TraineeResponseDto activate(String username);
 
     TraineeResponseDto deactivate(String username);
+
+    void changePassword(String username, String newPassword);
 }

@@ -21,4 +21,6 @@ public interface TrainerService {
     TrainerResponseDto activate(String username);
 
     TrainerResponseDto deactivate(String username);
+
+    void changePassword(String username, String newPassword);
 }

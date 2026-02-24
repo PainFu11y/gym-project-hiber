@@ -9,6 +9,7 @@ import com.gym_project.mapper.TraineeMapper;
 import com.gym_project.repository.TraineeRepository;
 import com.gym_project.service.TraineeService;
 
+import com.gym_project.utils.PasswordGenerator;
 import com.gym_project.utils.UsernameGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ public class TraineeServiceImpl implements TraineeService {
 
         Trainee trainee = TraineeMapper.toEntity(dto);
         trainee.setUsername(generatedUsername);
+        trainee.setPassword(PasswordGenerator.generate());
 
         traineeRepository.save(trainee);
 
@@ -107,6 +109,14 @@ public class TraineeServiceImpl implements TraineeService {
         trainee.setActive(false);
 
         return TraineeMapper.toDto(trainee);
+    }
+
+    @Override
+    public void changePassword(String username, String newPassword) {
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("Password cannot be blank");
+        }
+        traineeRepository.changePassword(username, newPassword);
     }
 
     private void validateUpdate(TraineeUpdateDto dto) {
