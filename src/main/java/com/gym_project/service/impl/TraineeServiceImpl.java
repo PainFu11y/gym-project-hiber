@@ -2,10 +2,14 @@ package com.gym_project.service.impl;
 
 
 import com.gym_project.dto.create.TraineeCreateDto;
+import com.gym_project.dto.filter.TraineeTrainingFilterDto;
 import com.gym_project.dto.response.TraineeResponseDto;
+import com.gym_project.dto.response.TrainingResponseDto;
 import com.gym_project.dto.update.TraineeUpdateDto;
 import com.gym_project.entity.Trainee;
+import com.gym_project.entity.Training;
 import com.gym_project.mapper.TraineeMapper;
+import com.gym_project.mapper.TrainingMapper;
 import com.gym_project.repository.TraineeRepository;
 import com.gym_project.service.TraineeService;
 
@@ -117,6 +121,15 @@ public class TraineeServiceImpl implements TraineeService {
             throw new IllegalArgumentException("Password cannot be blank");
         }
         traineeRepository.changePassword(username, newPassword);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TrainingResponseDto> getTrainings(String traineeUsername, TraineeTrainingFilterDto filter) {
+        List<Training> trainings = traineeRepository.findTrainingsByTraineeAndFilter(traineeUsername, filter);
+        return trainings.stream()
+                .map(TrainingMapper::toDto)
+                .toList();
     }
 
     private void validateUpdate(TraineeUpdateDto dto) {
