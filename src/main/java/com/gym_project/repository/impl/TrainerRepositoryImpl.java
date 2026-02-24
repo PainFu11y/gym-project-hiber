@@ -130,4 +130,13 @@ public class TrainerRepositoryImpl implements TrainerRepository {
                 )
                 .getResultList();
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<String> findUsernamesStartingWith(String base) {
+        return entityManager.createQuery(
+                        "SELECT t.username FROM Trainer t WHERE t.username LIKE :pattern", String.class)
+                .setParameter("pattern", base + "%")
+                .getResultList();
+    }
 }

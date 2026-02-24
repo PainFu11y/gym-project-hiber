@@ -33,4 +33,6 @@ public interface TrainerRepository {
     void deleteByUsername(String username);
 
     List<Trainer> findUnassignedTrainersByTraineeUsername(String traineeUsername);
+
+    List<String> findUsernamesStartingWith(String base);
 }
