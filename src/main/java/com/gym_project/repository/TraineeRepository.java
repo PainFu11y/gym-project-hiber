@@ -1,11 +1,15 @@
 package com.gym_project.repository;
 
+import com.gym_project.dto.filter.TraineeTrainingFilterDto;
 import com.gym_project.entity.Trainee;
+import com.gym_project.entity.Training;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,5 +42,7 @@ public interface TraineeRepository {
     void deleteByUsername(String username);
 
     void changePassword(String username, String newPassword);
+
+    List<Training> findTrainingsByTraineeAndFilter(String traineeUsername, TraineeTrainingFilterDto filter);
 
 }
