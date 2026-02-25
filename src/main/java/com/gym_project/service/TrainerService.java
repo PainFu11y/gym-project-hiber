@@ -4,6 +4,7 @@ import com.gym_project.dto.create.TrainerCreateDto;
 import com.gym_project.dto.filter.TrainerTrainingFilterDto;
 import com.gym_project.dto.response.TrainerResponseDto;
 import com.gym_project.dto.response.TrainingResponseDto;
+import com.gym_project.dto.update.TraineeTrainersUpdateDto;
 import com.gym_project.dto.update.TrainerUpdateDto;
 
 import java.util.List;
@@ -29,4 +30,6 @@ public interface TrainerService {
     List<TrainingResponseDto> getTrainings(String trainerUsername, TrainerTrainingFilterDto filter);
 
     List<TrainerResponseDto> getUnassignedTrainersByTraineeUsername(String traineeUsername);
+
+    List<TrainerResponseDto> updateTraineeTrainers(String traineeUsername, TraineeTrainersUpdateDto dto);
 }

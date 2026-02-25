@@ -4,11 +4,14 @@ import com.gym_project.dto.create.TrainerCreateDto;
 import com.gym_project.dto.filter.TrainerTrainingFilterDto;
 import com.gym_project.dto.response.TrainerResponseDto;
 import com.gym_project.dto.response.TrainingResponseDto;
+import com.gym_project.dto.update.TraineeTrainersUpdateDto;
 import com.gym_project.dto.update.TrainerUpdateDto;
+import com.gym_project.entity.Trainee;
 import com.gym_project.entity.Trainer;
 import com.gym_project.entity.Training;
 import com.gym_project.mapper.TrainerMapper;
 import com.gym_project.mapper.TrainingMapper;
+import com.gym_project.repository.TraineeRepository;
 import com.gym_project.repository.TrainerRepository;
 import com.gym_project.service.TrainerService;
 import com.gym_project.utils.UsernameGenerator;
@@ -24,6 +27,7 @@ import java.util.List;
 public class TrainerServiceImpl implements TrainerService {
 
     private final TrainerRepository trainerRepository;
+    private final TraineeRepository traineeRepository;
 
     @Override
     public TrainerResponseDto create(TrainerCreateDto dto) {
@@ -123,6 +127,40 @@ public class TrainerServiceImpl implements TrainerService {
                 trainerRepository.findUnassignedTrainersByTraineeUsername(traineeUsername);
 
         return trainers.stream()
+                .map(TrainerMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public List<TrainerResponseDto> updateTraineeTrainers(String traineeUsername,
+                                                          TraineeTrainersUpdateDto dto) {
+
+        if (traineeUsername == null || traineeUsername.isBlank()) {
+            throw new IllegalArgumentException("Trainee username must not be blank");
+        }
+
+        Trainee trainee = traineeRepository.findByUsername(traineeUsername)
+                .orElseThrow(() -> new RuntimeException("Trainee not found"));
+
+        if (trainee.getTrainers() != null) {
+            for (Trainer trainer : trainee.getTrainers()) {
+                trainer.getTrainees().remove(trainee);
+            }
+            trainee.getTrainers().clear();
+        }
+
+        List<Trainer> newTrainers = dto.getTrainerUsernames().stream()
+                .map(username -> trainerRepository.findByUsername(username)
+                        .orElseThrow(() -> new RuntimeException("Trainer not found: " + username)))
+                .toList();
+
+        for (Trainer trainer : newTrainers) {
+            trainer.getTrainees().add(trainee);
+            trainee.getTrainers().add(trainer);
+        }
+
+        return newTrainers.stream()
                 .map(TrainerMapper::toDto)
                 .toList();
     }
