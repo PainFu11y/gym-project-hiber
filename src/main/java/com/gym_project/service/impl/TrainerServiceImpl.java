@@ -111,6 +111,22 @@ public class TrainerServiceImpl implements TrainerService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<TrainerResponseDto> getUnassignedTrainersByTraineeUsername(String traineeUsername) {
+
+        if (traineeUsername == null || traineeUsername.isBlank()) {
+            throw new IllegalArgumentException("Trainee username must not be blank");
+        }
+
+        List<Trainer> trainers =
+                trainerRepository.findUnassignedTrainersByTraineeUsername(traineeUsername);
+
+        return trainers.stream()
+                .map(TrainerMapper::toDto)
+                .toList();
+    }
+
     private void validateCreate(TrainerCreateDto dto) {
         if (dto.getFirstName() == null || dto.getFirstName().isBlank()) {
             throw new IllegalArgumentException("First name cannot be empty");

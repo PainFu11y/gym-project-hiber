@@ -27,4 +27,6 @@ public interface TrainerService {
     void changePassword(String username, String newPassword);
 
     List<TrainingResponseDto> getTrainings(String trainerUsername, TrainerTrainingFilterDto filter);
+
+    List<TrainerResponseDto> getUnassignedTrainersByTraineeUsername(String traineeUsername);
 }
