@@ -16,6 +16,7 @@ import com.gym_project.repository.TrainerRepository;
 import com.gym_project.service.TrainerService;
 import com.gym_project.utils.UsernameGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +49,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("#username == authentication.name")
     public TrainerResponseDto getByUsername(String username) {
         Trainer trainer = trainerRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
@@ -56,6 +58,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('TRAINER', 'TRAINEE')")
     public List<TrainerResponseDto> getAll() {
         return trainerRepository.findAll().stream()
                 .map(TrainerMapper::toDto)
@@ -76,6 +79,7 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
+    @PreAuthorize("#username == authentication.name")
     public void deleteByUsername(String username) {
         Trainer trainer = trainerRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
@@ -83,6 +87,7 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
+    @PreAuthorize("#username == authentication.name or hasRole('TRAINER')")
     public TrainerResponseDto activate(String username) {
         Trainer trainer = trainerRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
@@ -91,6 +96,7 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
+    @PreAuthorize("#username == authentication.name or hasRole('TRAINER')")
     public TrainerResponseDto deactivate(String username) {
         Trainer trainer = trainerRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
@@ -99,6 +105,7 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
+    @PreAuthorize("#username == authentication.name")
     public void changePassword(String username, String newPassword) {
         if (newPassword == null || newPassword.isBlank()) {
             throw new IllegalArgumentException("Password cannot be blank");
@@ -108,6 +115,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("#username == authentication.name or hasRole('TRAINER')")
     public List<TrainingResponseDto> getTrainings(String trainerUsername, TrainerTrainingFilterDto filter) {
         List<Training> trainings = trainerRepository.findTrainingsByTrainerAndFilter(trainerUsername, filter);
         return trainings.stream()
@@ -117,6 +125,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('TRAINER')")
     public List<TrainerResponseDto> getUnassignedTrainersByTraineeUsername(String traineeUsername) {
 
         if (traineeUsername == null || traineeUsername.isBlank()) {
@@ -133,6 +142,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional
+    @PreAuthorize("#username == authentication.name or hasRole('TRAINER')")
     public List<TrainerResponseDto> updateTraineeTrainers(String traineeUsername,
                                                           TraineeTrainersUpdateDto dto) {
 
