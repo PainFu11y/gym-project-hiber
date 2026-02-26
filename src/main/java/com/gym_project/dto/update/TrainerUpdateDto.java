@@ -10,5 +10,4 @@ public class TrainerUpdateDto {
     private String firstName;
     private String lastName;
     private String specialization;
-    private boolean active;
 }

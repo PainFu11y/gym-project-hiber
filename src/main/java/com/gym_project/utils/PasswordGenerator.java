@@ -10,9 +10,9 @@ public class PasswordGenerator {
     private static final String CHARS =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int PASSWORD_LENGTH = 10;
-    private final SecureRandom random = new SecureRandom();
+    private static final SecureRandom random = new SecureRandom();
 
-    public String generate() {
+    public static String generate() {
         char[] password = new char[PASSWORD_LENGTH];
         for (int i = 0; i < PASSWORD_LENGTH; i++) {
             password[i] = CHARS.charAt(random.nextInt(CHARS.length()));

@@ -1,11 +1,15 @@
 package com.gym_project.repository;
 
+import com.gym_project.dto.filter.TraineeTrainingFilterDto;
 import com.gym_project.entity.Trainee;
+import com.gym_project.entity.Training;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,26 +17,32 @@ public interface TraineeRepository {
 
     void save(Trainee trainee);
 
-    public Trainee update(Trainee trainee);
+    Trainee update(Trainee trainee);
 
     void delete(Trainee trainee);
 
-    public Optional<Trainee> findById(Long id);
+    Optional<Trainee> findById(Long id);
 
-    public List<Trainee> findAll();
+    List<Trainee> findAll();
 
-    public List<Trainee> findByAddress(String address);
+    List<Trainee> findByAddress(String address);
 
-    public Optional<Trainee> findByUsernameAndPassword(String username, String password);
+    Optional<Trainee> findByUsernameAndPassword(String username, String password);
 
-    public Optional<Trainee> findByUsername(String username);
+    Optional<Trainee> findByUsername(String username);
 
-    public void changePassword(String username, String newPassword);
+    boolean existsByUsername(String username);
 
-    public void activate(String username);
+    List<String> findUsernamesStartingWith(String prefix);
 
-    public void deactivate(String username);
+    void activate(String username);
 
-    public void deleteByUsername(String username);
+    void deactivate(String username);
+
+    void deleteByUsername(String username);
+
+    void changePassword(String username, String newPassword);
+
+    List<Training> findTrainingsByTraineeAndFilter(String traineeUsername, TraineeTrainingFilterDto filter);
 
 }

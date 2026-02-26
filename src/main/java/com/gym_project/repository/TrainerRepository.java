@@ -1,6 +1,8 @@
 package com.gym_project.repository;
 
+import com.gym_project.dto.filter.TrainerTrainingFilterDto;
 import com.gym_project.entity.Trainer;
+import com.gym_project.entity.Training;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,4 +35,8 @@ public interface TrainerRepository {
     void deleteByUsername(String username);
 
     List<Trainer> findUnassignedTrainersByTraineeUsername(String traineeUsername);
+
+    List<String> findUsernamesStartingWith(String base);
+
+    List<Training> findTrainingsByTrainerAndFilter(String trainerUsername, TrainerTrainingFilterDto filter);
 }

@@ -2,12 +2,12 @@ package com.gym_project.utils;
 
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
+import java.util.List;
 
 @Component
 public class UsernameGenerator {
 
-    public String generate(String firstName, String lastName, Set<String> existingUsernames) {
+    public static String generate(String firstName, String lastName, List<String> existingUsernames) {
         String base = firstName + "." + lastName;
 
         int maxIndex = existingUsernames.stream()
@@ -24,11 +24,6 @@ public class UsernameGenerator {
                 .max(Integer::compare)
                 .orElse(-1);
 
-        if (maxIndex == -1) {
-            return base;
-        } else {
-            int nextUsersIndex = maxIndex + 1;
-            return base + (nextUsersIndex);
-        }
+        return maxIndex < 0 ? base : base + (maxIndex + 1);
     }
 }

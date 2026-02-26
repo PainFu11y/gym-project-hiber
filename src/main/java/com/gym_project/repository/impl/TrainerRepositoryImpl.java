@@ -1,7 +1,9 @@
 package com.gym_project.repository.impl;
 
+import com.gym_project.dto.filter.TrainerTrainingFilterDto;
 import com.gym_project.entity.Trainee;
 import com.gym_project.entity.Trainer;
+import com.gym_project.entity.Training;
 import com.gym_project.repository.TrainerRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,5 +131,37 @@ public class TrainerRepositoryImpl implements TrainerRepository {
                                 .getSingleResult()
                 )
                 .getResultList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<String> findUsernamesStartingWith(String base) {
+        return entityManager.createQuery(
+                        "SELECT t.username FROM Trainer t WHERE t.username LIKE :pattern", String.class)
+                .setParameter("pattern", base + "%")
+                .getResultList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<Training> findTrainingsByTrainerAndFilter(String trainerUsername, TrainerTrainingFilterDto filter) {
+        StringBuilder sb = new StringBuilder("SELECT tr FROM Training tr WHERE tr.trainer.username = :username");
+
+        if (filter.getFromDate() != null) sb.append(" AND tr.trainingDate >= :fromDate");
+        if (filter.getToDate() != null) sb.append(" AND tr.trainingDate <= :toDate");
+        if (filter.getTraineeName() != null && !filter.getTraineeName().isBlank()) {
+            sb.append(" AND (tr.trainee.firstName LIKE :traineeName OR tr.trainee.lastName LIKE :traineeName)");
+        }
+
+        var query = entityManager.createQuery(sb.toString(), Training.class)
+                .setParameter("username", trainerUsername);
+
+        if (filter.getFromDate() != null) query.setParameter("fromDate", filter.getFromDate());
+        if (filter.getToDate() != null) query.setParameter("toDate", filter.getToDate());
+        if (filter.getTraineeName() != null && !filter.getTraineeName().isBlank()) {
+            query.setParameter("traineeName", "%" + filter.getTraineeName() + "%");
+        }
+
+        return query.getResultList();
     }
 }
