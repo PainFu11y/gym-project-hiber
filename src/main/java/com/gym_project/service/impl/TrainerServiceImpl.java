@@ -165,6 +165,23 @@ public class TrainerServiceImpl implements TrainerService {
                 .toList();
     }
 
+    @Override
+    public TrainerResponseDto validateCredentials(String username, String password) {
+
+        Trainer trainer = trainerRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+
+        if (!trainer.isActive()) {
+            throw new RuntimeException("Trainer is deactivated");
+        }
+
+        if (!trainer.getPassword().equals(password)) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        return TrainerMapper.toDto(trainer) ;
+    }
+
     private void validateCreate(TrainerCreateDto dto) {
         if (dto.getFirstName() == null || dto.getFirstName().isBlank()) {
             throw new IllegalArgumentException("First name cannot be empty");

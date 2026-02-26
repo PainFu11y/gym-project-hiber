@@ -32,4 +32,6 @@ public interface TrainerService {
     List<TrainerResponseDto> getUnassignedTrainersByTraineeUsername(String traineeUsername);
 
     List<TrainerResponseDto> updateTraineeTrainers(String traineeUsername, TraineeTrainersUpdateDto dto);
+
+    TrainerResponseDto validateCredentials(String username, String password);
 }

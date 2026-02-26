@@ -132,6 +132,23 @@ public class TraineeServiceImpl implements TraineeService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public TraineeResponseDto validateCredentials(String username, String password) {
+
+        Trainee trainee = traineeRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Trainee not found"));
+
+        if (!trainee.isActive()) {
+            throw new RuntimeException("Trainee is deactivated");
+        }
+
+        if (!trainee.getPassword().equals(password)) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        return TraineeMapper.toDto(trainee);
+    }
     private void validateUpdate(TraineeUpdateDto dto) {
 
         if (dto.getFirstName() != null && dto.getFirstName().isBlank()) {
