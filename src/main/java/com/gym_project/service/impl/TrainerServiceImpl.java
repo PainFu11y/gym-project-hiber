@@ -14,6 +14,7 @@ import com.gym_project.mapper.TrainingMapper;
 import com.gym_project.repository.TraineeRepository;
 import com.gym_project.repository.TrainerRepository;
 import com.gym_project.service.TrainerService;
+import com.gym_project.utils.PasswordGenerator;
 import com.gym_project.utils.UsernameGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,6 +42,7 @@ public class TrainerServiceImpl implements TrainerService {
 
         Trainer trainer = TrainerMapper.toEntity(dto);
         trainer.setUsername(generatedUsername);
+        trainer.setPassword(PasswordGenerator.generate());
 
         trainerRepository.save(trainer);
 
