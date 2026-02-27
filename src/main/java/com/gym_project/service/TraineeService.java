@@ -27,4 +27,6 @@ public interface TraineeService {
     void changePassword(String username, String newPassword);
 
     List<TrainingResponseDto> getTrainings(String traineeUsername, TraineeTrainingFilterDto filter);
+
+    TraineeResponseDto validateCredentials(String username, String password);
 }

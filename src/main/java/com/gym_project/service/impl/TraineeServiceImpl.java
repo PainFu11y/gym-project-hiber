@@ -16,6 +16,7 @@ import com.gym_project.service.TraineeService;
 import com.gym_project.utils.PasswordGenerator;
 import com.gym_project.utils.UsernameGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +54,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("#username == authentication.name")
     public TraineeResponseDto getByUsername(String username) {
 
         Trainee trainee = traineeRepository.findByUsername(username)
@@ -63,6 +65,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('TRAINEE', 'TRAINER')")
     public List<TraineeResponseDto> getAll() {
 
         return traineeRepository.findAll()
@@ -72,6 +75,7 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
+    @PreAuthorize("#username == authentication.name")
     public TraineeResponseDto update(String username, TraineeUpdateDto dto) {
 
         validateUpdate(dto);
@@ -85,6 +89,7 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
+    @PreAuthorize("#username == authentication.name")
     public void deleteByUsername(String username) {
 
         Trainee trainee = traineeRepository.findByUsername(username)
@@ -94,6 +99,7 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
+    @PreAuthorize("#username == authentication.name or hasRole('TRAINER')")
     public TraineeResponseDto activate(String username) {
 
         Trainee trainee = traineeRepository.findByUsername(username)
@@ -105,6 +111,7 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
+    @PreAuthorize("#username == authentication.name or hasRole('TRAINER')")
     public TraineeResponseDto deactivate(String username) {
 
         Trainee trainee = traineeRepository.findByUsername(username)
@@ -116,6 +123,7 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
+    @PreAuthorize("#username == authentication.name")
     public void changePassword(String username, String newPassword) {
         if (newPassword == null || newPassword.isBlank()) {
             throw new IllegalArgumentException("Password cannot be blank");
@@ -125,11 +133,30 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("#username == authentication.name")
     public List<TrainingResponseDto> getTrainings(String traineeUsername, TraineeTrainingFilterDto filter) {
         List<Training> trainings = traineeRepository.findTrainingsByTraineeAndFilter(traineeUsername, filter);
         return trainings.stream()
                 .map(TrainingMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TraineeResponseDto validateCredentials(String username, String password) {
+
+        Trainee trainee = traineeRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Trainee not found"));
+
+        if (!trainee.isActive()) {
+            throw new RuntimeException("Trainee is deactivated");
+        }
+
+        if (!trainee.getPassword().equals(password)) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        return TraineeMapper.toDto(trainee);
     }
 
     private void validateUpdate(TraineeUpdateDto dto) {
