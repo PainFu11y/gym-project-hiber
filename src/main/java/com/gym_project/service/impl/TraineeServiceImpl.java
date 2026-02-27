@@ -36,10 +36,7 @@ public class TraineeServiceImpl implements TraineeService {
         validate(dto);
 
         String base = dto.getFirstName() + "." + dto.getLastName();
-
-        List<String> existingUsernames =
-                traineeRepository.findUsernamesStartingWith(base);
-
+        List<String> existingUsernames = traineeRepository.findUsernamesStartingWith(base);
         String generatedUsername =
                 UsernameGenerator.generate(dto.getFirstName(), dto.getLastName(), existingUsernames);
 
