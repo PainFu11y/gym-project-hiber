@@ -6,6 +6,7 @@ import com.gym_project.dto.create.TrainingCreateDto;
 import com.gym_project.dto.filter.TraineeTrainingFilterDto;
 import com.gym_project.dto.filter.TrainerTrainingFilterDto;
 import com.gym_project.dto.response.TrainerResponseDto;
+import com.gym_project.dto.response.TrainingResponseDto;
 import com.gym_project.dto.update.TraineeTrainersUpdateDto;
 import com.gym_project.dto.update.TraineeUpdateDto;
 import com.gym_project.dto.update.TrainerUpdateDto;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 @Component
@@ -214,10 +216,9 @@ public class AppRunner {
 
     private void viewTraineeTrainings(String username) {
         System.out.println("Filter trainings: ");
-        String choice = scanner.nextLine();
-        var filterDto = new TraineeTrainingFilterDto();
+        TraineeTrainingFilterDto filterDto = new TraineeTrainingFilterDto();
 
-            System.out.print("From date (YYYY-MM-DD) or blank: ");
+        System.out.print("From date (YYYY-MM-DD) or blank: ");
             String from = scanner.nextLine();
             if (!from.isBlank()) filterDto.setFromDate(LocalDate.parse(from));
 
@@ -234,7 +235,7 @@ public class AppRunner {
             if (!trainingType.isBlank()) filterDto.setTrainingTypeName(trainingType);
 
 
-        var trainings = traineeService.getTrainings(username, filterDto);
+        List<TrainingResponseDto> trainings = traineeService.getTrainings(username, filterDto);
         if (trainings.isEmpty()) {
             System.out.println("No trainings found.");
         } else {
