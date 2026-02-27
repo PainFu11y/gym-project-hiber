@@ -213,11 +213,10 @@ public class AppRunner {
     }
 
     private void viewTraineeTrainings(String username) {
-        System.out.println("Filter trainings? (y/n): ");
+        System.out.println("Filter trainings: ");
         String choice = scanner.nextLine();
         var filterDto = new TraineeTrainingFilterDto();
 
-        if (choice.equalsIgnoreCase("y")) {
             System.out.print("From date (YYYY-MM-DD) or blank: ");
             String from = scanner.nextLine();
             if (!from.isBlank()) filterDto.setFromDate(LocalDate.parse(from));
@@ -233,7 +232,7 @@ public class AppRunner {
             System.out.print("Training type or blank: ");
             String trainingType = scanner.nextLine();
             if (!trainingType.isBlank()) filterDto.setTrainingTypeName(trainingType);
-        }
+
 
         var trainings = traineeService.getTrainings(username, filterDto);
         if (trainings.isEmpty()) {
