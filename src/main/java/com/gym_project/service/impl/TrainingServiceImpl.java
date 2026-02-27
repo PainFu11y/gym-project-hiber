@@ -42,6 +42,11 @@ public class TrainingServiceImpl implements TrainingService {
         training.setTrainingDate(dto.getTrainingDate());
         training.setTrainingDuration(dto.getTrainingDuration());
 
+        if (!trainer.getTrainees().contains(trainee)) {
+            trainer.getTrainees().add(trainee);
+            trainee.getTrainers().add(trainer);
+        }
+
         trainingRepository.save(training);
 
         return TrainingMapper.toDto(training);

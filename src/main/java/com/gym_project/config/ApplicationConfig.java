@@ -21,7 +21,7 @@ import java.util.Properties;
 @EnableTransactionManagement
 @PropertySource("classpath:/application.properties")
 @ComponentScan("com.gym_project")
-public class HibernateConfig {
+public class ApplicationConfig {
 
     @Value("${db.driver}")
     private String databaseDriver;
@@ -83,8 +83,4 @@ public class HibernateConfig {
         return new JpaTransactionManager(emf);
     }
 
-    @Bean
-    public void testInit(EntityManagerFactory emf) {
-        System.out.println("EntityManagerFactory initialized");
-    }
 }

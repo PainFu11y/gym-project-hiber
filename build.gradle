@@ -19,10 +19,10 @@ dependencies {
     implementation 'org.springframework:spring-orm:5.3.29'
 
     // Spring Security
-    implementation 'org.springframework.security:spring-security-core:5.8.8'
-    implementation 'org.springframework.security:spring-security-config:5.8.8'
-    implementation 'org.springframework.security:spring-security-context:5.8.8'
-    implementation 'org.springframework.security:spring-security-web:5.8.8'
+    implementation platform('org.springframework.security:spring-security-bom:5.8.7')
+    implementation 'org.springframework.security:spring-security-core'
+    implementation 'org.springframework.security:spring-security-config'
+    implementation 'org.springframework.security:spring-security-web'
 
     // Hibernate JPA
     implementation'org.hibernate:hibernate-core:5.6.15.Final'

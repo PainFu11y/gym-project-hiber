@@ -36,10 +36,7 @@ public class TraineeServiceImpl implements TraineeService {
         validate(dto);
 
         String base = dto.getFirstName() + "." + dto.getLastName();
-
-        List<String> existingUsernames =
-                traineeRepository.findUsernamesStartingWith(base);
-
+        List<String> existingUsernames = traineeRepository.findUsernamesStartingWith(base);
         String generatedUsername =
                 UsernameGenerator.generate(dto.getFirstName(), dto.getLastName(), existingUsernames);
 
@@ -133,7 +130,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("#username == authentication.name")
+    @PreAuthorize("#username == authentication.name or hasRole('TRAINEE')")
     public List<TrainingResponseDto> getTrainings(String traineeUsername, TraineeTrainingFilterDto filter) {
         List<Training> trainings = traineeRepository.findTrainingsByTraineeAndFilter(traineeUsername, filter);
         return trainings.stream()
