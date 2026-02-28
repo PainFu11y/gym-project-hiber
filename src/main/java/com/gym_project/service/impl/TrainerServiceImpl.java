@@ -115,6 +115,8 @@ public class TrainerServiceImpl implements TrainerService {
                     return new RuntimeException("Trainer not found");
                 });
 
+        trainerRepository.deleteByUsername(username);
+
         log.info("Trainer deleted: {}", username);
     }
 
