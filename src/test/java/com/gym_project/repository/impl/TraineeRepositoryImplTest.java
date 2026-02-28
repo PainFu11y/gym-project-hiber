@@ -173,4 +173,53 @@ class TraineeRepositoryImplTest {
         assertNotNull(result);
         verify(query).getResultList();
     }
+
+    @Test
+    void findTrainingsByTraineeAndFilter_shouldReturnList() {
+        TraineeTrainingFilterDto filter = new TraineeTrainingFilterDto();
+        filter.setFromDate(LocalDate.of(2026, 2, 1));
+        filter.setToDate(LocalDate.of(2026, 2, 28));
+        filter.setTrainerName("John");
+        filter.setTrainingTypeName("Yoga");
+
+        Training training = new Training();
+
+        TypedQuery<Training> typedQuery = mock(TypedQuery.class);
+        when(entityManager.createQuery(anyString(), eq(Training.class))).thenReturn(typedQuery);
+        when(typedQuery.setParameter(anyString(), any())).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(List.of(training));
+
+        List<Training> result = repository.findTrainingsByTraineeAndFilter("trainee1", filter);
+
+        assertEquals(1, result.size());
+        assertSame(training, result.get(0));
+
+        verify(typedQuery).setParameter("username", "trainee1");
+        verify(typedQuery).setParameter("fromDate", filter.getFromDate());
+        verify(typedQuery).setParameter("toDate", filter.getToDate());
+        verify(typedQuery).setParameter("trainerName", "%John%");
+        verify(typedQuery).setParameter("trainingTypeName", "Yoga");
+    }
+
+    @Test
+    void findTrainingsByTraineeAndFilter_withoutOptionalFilters_shouldSetOnlyUsername() {
+        TraineeTrainingFilterDto filter = new TraineeTrainingFilterDto();
+
+        Training training = new Training();
+        TypedQuery<Training> typedQuery = mock(TypedQuery.class);
+        when(entityManager.createQuery(anyString(), eq(Training.class))).thenReturn(typedQuery);
+        when(typedQuery.setParameter(anyString(), any())).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(List.of(training));
+
+        List<Training> result = repository.findTrainingsByTraineeAndFilter("trainee1", filter);
+
+        assertEquals(1, result.size());
+        assertSame(training, result.get(0));
+
+        verify(typedQuery).setParameter("username", "trainee1");
+        verify(typedQuery, never()).setParameter(eq("fromDate"), any());
+        verify(typedQuery, never()).setParameter(eq("toDate"), any());
+        verify(typedQuery, never()).setParameter(eq("trainerName"), any());
+        verify(typedQuery, never()).setParameter(eq("trainingTypeName"), any());
+    }
 }
