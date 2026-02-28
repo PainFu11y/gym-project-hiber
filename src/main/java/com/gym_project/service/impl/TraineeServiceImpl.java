@@ -16,6 +16,7 @@ import com.gym_project.service.TraineeService;
 import com.gym_project.utils.PasswordGenerator;
 import com.gym_project.utils.UsernameGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -32,6 +34,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public TraineeResponseDto create(TraineeCreateDto dto) {
+        log.info("Creating trainee: {} {}", dto.getFirstName(), dto.getLastName());
 
         validate(dto);
 
@@ -46,6 +49,8 @@ public class TraineeServiceImpl implements TraineeService {
 
         traineeRepository.save(trainee);
 
+        log.info("Trainee created successfully: {}", generatedUsername);
+
         return TraineeMapper.toDto(trainee);
     }
 
@@ -53,6 +58,8 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional(readOnly = true)
     @PreAuthorize("#username == authentication.name")
     public TraineeResponseDto getByUsername(String username) {
+
+        log.debug("Fetching trainee by username: {}", username);
 
         Trainee trainee = traineeRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainee not found"));
@@ -75,12 +82,16 @@ public class TraineeServiceImpl implements TraineeService {
     @PreAuthorize("#username == authentication.name")
     public TraineeResponseDto update(String username, TraineeUpdateDto dto) {
 
+        log.info("Updating trainee: {}", username);
+
         validateUpdate(dto);
 
         Trainee trainee = traineeRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainee not found"));
 
         TraineeMapper.updateEntity(trainee, dto);
+
+        log.info("Updating trainee: {}", username);
 
         return TraineeMapper.toDto(trainee);
     }
@@ -89,15 +100,20 @@ public class TraineeServiceImpl implements TraineeService {
     @PreAuthorize("#username == authentication.name")
     public void deleteByUsername(String username) {
 
+        log.info("Trainee updated successfully: {}", username);
+
         Trainee trainee = traineeRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainee not found"));
 
         traineeRepository.delete(trainee);
+
+        log.info("Deleting trainee: {}", username);
     }
 
     @Override
     @PreAuthorize("#username == authentication.name or hasRole('TRAINER')")
     public TraineeResponseDto activate(String username) {
+        log.info("Activating trainee: {}", username);
 
         Trainee trainee = traineeRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainee not found"));
@@ -110,6 +126,7 @@ public class TraineeServiceImpl implements TraineeService {
     @Override
     @PreAuthorize("#username == authentication.name or hasRole('TRAINER')")
     public TraineeResponseDto deactivate(String username) {
+        log.info("Deactivating trainee: {}", username);
 
         Trainee trainee = traineeRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainee not found"));
@@ -122,10 +139,14 @@ public class TraineeServiceImpl implements TraineeService {
     @Override
     @PreAuthorize("#username == authentication.name")
     public void changePassword(String username, String newPassword) {
+        log.info("Changing password for trainee: {}", username);
+
         if (newPassword == null || newPassword.isBlank()) {
             throw new IllegalArgumentException("Password cannot be blank");
         }
         traineeRepository.changePassword(username, newPassword);
+
+        log.info("Password changed successfully for trainee: {}", username);
     }
 
     @Override
@@ -142,6 +163,8 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional(readOnly = true)
     public TraineeResponseDto validateCredentials(String username, String password) {
 
+        log.debug("Validating credentials for trainee: {}", username);
+
         Trainee trainee = traineeRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainee not found"));
 
@@ -152,6 +175,8 @@ public class TraineeServiceImpl implements TraineeService {
         if (!trainee.getPassword().equals(password)) {
             throw new RuntimeException("Invalid password");
         }
+
+        log.info("Trainee successfully authenticated: {}", username);
 
         return TraineeMapper.toDto(trainee);
     }
