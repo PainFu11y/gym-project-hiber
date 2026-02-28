@@ -7,9 +7,11 @@ import com.gym_project.mapper.TrainingMapper;
 import com.gym_project.repository.*;
 import com.gym_project.service.TrainingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -23,16 +25,30 @@ public class TrainingServiceImpl implements TrainingService {
     @Override
     public TrainingResponseDto create(TrainingCreateDto dto) {
 
+        log.info("Creating training: trainee={}, trainer={}, typeId={}",
+                dto.getTraineeUsername(),
+                dto.getTrainerUsername(),
+                dto.getTrainingTypeId());
+
         validate(dto);
 
         Trainee trainee = traineeRepository.findByUsername(dto.getTraineeUsername())
-                .orElseThrow(() -> new RuntimeException("Trainee not found"));
+                .orElseThrow(() -> {
+                    log.error("Trainee not found: {}", dto.getTraineeUsername());
+                    return new RuntimeException("Trainee not found");
+                });
 
         Trainer trainer = trainerRepository.findByUsername(dto.getTrainerUsername())
-                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+                .orElseThrow(() -> {
+                    log.error("Trainer not found: {}", dto.getTrainerUsername());
+                    return new RuntimeException("Trainer not found");
+                });
 
         TrainingType trainingType = trainingTypeRepository.findById(dto.getTrainingTypeId())
-                .orElseThrow(() -> new RuntimeException("Training type not found"));
+                .orElseThrow(() -> {
+                    log.error("Training type not found: {}", dto.getTrainingTypeId());
+                    return new RuntimeException("Training type not found");
+                });
 
         Training training = new Training();
         training.setTrainee(trainee);
@@ -45,9 +61,14 @@ public class TrainingServiceImpl implements TrainingService {
         if (!trainer.getTrainees().contains(trainee)) {
             trainer.getTrainees().add(trainee);
             trainee.getTrainers().add(trainer);
+            log.debug("Linked trainer {} with trainee {}",
+                    trainer.getUsername(), trainee.getUsername());
         }
 
         trainingRepository.save(training);
+
+        log.info("Training successfully created: id={}, name={}",
+                training.getId(), training.getTrainingName());
 
         return TrainingMapper.toDto(training);
     }
@@ -55,26 +76,32 @@ public class TrainingServiceImpl implements TrainingService {
     private void validate(TrainingCreateDto dto) {
 
         if (dto.getTraineeUsername() == null || dto.getTraineeUsername().isBlank()) {
+            log.error("Validation failed: trainee username is blank");
             throw new IllegalArgumentException("Trainee username is required");
         }
 
         if (dto.getTrainerUsername() == null || dto.getTrainerUsername().isBlank()) {
+            log.error("Validation failed: trainer username is blank");
             throw new IllegalArgumentException("Trainer username is required");
         }
 
         if (dto.getTrainingTypeId() == null) {
+            log.error("Validation failed: training type id is null");
             throw new IllegalArgumentException("Training type is required");
         }
 
         if (dto.getTrainingName() == null || dto.getTrainingName().isBlank()) {
+            log.error("Validation failed: training name is blank");
             throw new IllegalArgumentException("Training name is required");
         }
 
         if (dto.getTrainingDate() == null) {
+            log.error("Validation failed: training date is null");
             throw new IllegalArgumentException("Training date is required");
         }
 
         if (dto.getTrainingDuration() == null || dto.getTrainingDuration() <= 0) {
+            log.error("Validation failed: training duration invalid");
             throw new IllegalArgumentException("Training duration must be positive");
         }
     }
