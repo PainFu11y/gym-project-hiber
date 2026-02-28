@@ -74,7 +74,7 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('TRAINEE', 'TRAINER')")
     public List<TraineeResponseDto> getAll() {
-
+        log.debug("Fetching all trainees");
         return traineeRepository.findAll()
                 .stream()
                 .map(TraineeMapper::toDto)

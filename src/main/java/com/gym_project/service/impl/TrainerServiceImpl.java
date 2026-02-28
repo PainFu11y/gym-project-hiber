@@ -77,6 +77,7 @@ public class TrainerServiceImpl implements TrainerService {
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('TRAINER', 'TRAINEE')")
     public List<TrainerResponseDto> getAll() {
+        log.debug("Fetching all trainers");
         return trainerRepository.findAll().stream()
                 .map(TrainerMapper::toDto)
                 .toList();
