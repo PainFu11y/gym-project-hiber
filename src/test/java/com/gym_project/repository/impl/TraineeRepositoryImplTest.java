@@ -1,0 +1,176 @@
+package com.gym_project.repository.impl;
+
+import com.gym_project.dto.filter.TraineeTrainingFilterDto;
+import com.gym_project.entity.Trainee;
+import com.gym_project.entity.Training;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class TraineeRepositoryImplTest {
+
+    private TraineeRepositoryImpl repository;
+    private EntityManager entityManager;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        entityManager = mock(EntityManager.class);
+        repository = new TraineeRepositoryImpl();
+
+        Field emField = TraineeRepositoryImpl.class.getDeclaredField("entityManager");
+        emField.setAccessible(true);
+        emField.set(repository, entityManager);
+    }
+
+    @Test
+    void save_shouldCallPersist() {
+        Trainee trainee = new Trainee();
+        repository.save(trainee);
+        verify(entityManager).persist(trainee);
+    }
+
+    @Test
+    void update_shouldCallMerge() {
+        Trainee trainee = new Trainee();
+        when(entityManager.merge(trainee)).thenReturn(trainee);
+        Trainee result = repository.update(trainee);
+        assertEquals(trainee, result);
+        verify(entityManager).merge(trainee);
+    }
+
+    @Test
+    void delete_shouldCallRemove() {
+        Trainee trainee = mock(Trainee.class);
+        when(entityManager.contains(trainee)).thenReturn(true);
+        repository.delete(trainee);
+        verify(entityManager).remove(trainee);
+    }
+
+    @Test
+    void findById_shouldReturnOptional() {
+        Trainee trainee = new Trainee();
+        when(entityManager.find(Trainee.class, 1L)).thenReturn(trainee);
+
+        Optional<Trainee> result = repository.findById(1L);
+        assertTrue(result.isPresent());
+        assertEquals(trainee, result.get());
+    }
+
+    @Test
+    void findAll_shouldCallQueryGetResultList() {
+        TypedQuery<Trainee> query = mock(TypedQuery.class);
+        when(entityManager.createQuery("SELECT t FROM Trainee t", Trainee.class)).thenReturn(query);
+        when(query.getResultList()).thenReturn(List.of(new Trainee()));
+
+        List<Trainee> result = repository.findAll();
+        assertEquals(1, result.size());
+        verify(query).getResultList();
+    }
+
+    @Test
+    void findByUsername_shouldReturnOptional() {
+        TypedQuery<Trainee> query = mock(TypedQuery.class);
+        when(entityManager.createQuery(
+                "SELECT t FROM Trainee t WHERE t.username = :username", Trainee.class))
+                .thenReturn(query);
+        when(query.setParameter("username", "john")).thenReturn(query);
+        when(query.getResultStream()).thenReturn(List.of(new Trainee()).stream());
+
+        Optional<Trainee> result = repository.findByUsername("john");
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void existsByUsername_shouldReturnTrue() {
+        TypedQuery<Long> query = mock(TypedQuery.class);
+        when(entityManager.createQuery(
+                "SELECT COUNT(t) FROM Trainee t WHERE t.username = :username", Long.class))
+                .thenReturn(query);
+        when(query.setParameter("username", "john")).thenReturn(query);
+        when(query.getSingleResult()).thenReturn(1L);
+
+        boolean exists = repository.existsByUsername("john");
+        assertTrue(exists);
+    }
+
+    @Test
+    void changePassword_shouldMergeUpdatedEntity() {
+        Trainee trainee = new Trainee();
+        trainee.setUsername("john");
+
+        TraineeRepositoryImpl spyRepo = spy(repository);
+        doReturn(Optional.of(trainee)).when(spyRepo).findByUsername("john");
+
+        spyRepo.changePassword("john", "newpass");
+        assertEquals("newpass", trainee.getPassword());
+        verify(entityManager).merge(trainee);
+    }
+
+    @Test
+    void activate_shouldSetActiveTrue() {
+        Trainee trainee = new Trainee();
+        trainee.setUsername("john");
+
+        TraineeRepositoryImpl spyRepo = spy(repository);
+        doReturn(Optional.of(trainee)).when(spyRepo).findByUsername("john");
+
+        spyRepo.activate("john");
+        assertTrue(trainee.isActive());
+        verify(entityManager).merge(trainee);
+    }
+
+    @Test
+    void deactivate_shouldSetActiveFalse() {
+        Trainee trainee = new Trainee();
+        trainee.setUsername("john");
+        trainee.setActive(true);
+
+        TraineeRepositoryImpl spyRepo = spy(repository);
+        doReturn(Optional.of(trainee)).when(spyRepo).findByUsername("john");
+
+        spyRepo.deactivate("john");
+        assertFalse(trainee.isActive());
+        verify(entityManager).merge(trainee);
+    }
+
+    @Test
+    void deleteByUsername_shouldCallRemove() {
+        Trainee trainee = new Trainee();
+        trainee.setUsername("john");
+
+        TraineeRepositoryImpl spyRepo = spy(repository);
+        doReturn(Optional.of(trainee)).when(spyRepo).findByUsername("john");
+
+        when(entityManager.contains(trainee)).thenReturn(false);
+        when(entityManager.merge(trainee)).thenReturn(trainee);
+
+        spyRepo.deleteByUsername("john");
+
+        verify(entityManager).remove(trainee);
+    }
+
+    @Test
+    void findTrainingsByTraineeAndFilter_shouldBuildQuery() {
+        TypedQuery<Training> query = mock(TypedQuery.class);
+        TraineeTrainingFilterDto filter = new TraineeTrainingFilterDto();
+        filter.setFromDate(LocalDate.now());
+        filter.setToDate(LocalDate.now().plusDays(1));
+
+        when(entityManager.createQuery(anyString(), eq(Training.class))).thenReturn(query);
+        when(query.setParameter(anyString(), any())).thenReturn(query);
+        when(query.getResultList()).thenReturn(List.of());
+
+        List<Training> result = repository.findTrainingsByTraineeAndFilter("john", filter);
+        assertNotNull(result);
+        verify(query).getResultList();
+    }
+}
