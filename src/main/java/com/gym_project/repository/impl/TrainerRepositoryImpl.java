@@ -17,7 +17,7 @@ import java.util.Optional;
 public class TrainerRepositoryImpl implements TrainerRepository {
 
     @PersistenceContext
-    private EntityManager entityManager;
+    EntityManager entityManager;
 
     @Override
     @Transactional

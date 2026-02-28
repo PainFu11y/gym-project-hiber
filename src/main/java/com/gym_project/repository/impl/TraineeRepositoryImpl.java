@@ -17,7 +17,7 @@ import java.util.Optional;
 public class TraineeRepositoryImpl implements TraineeRepository {
 
     @PersistenceContext
-    private EntityManager entityManager;
+    EntityManager entityManager;
 
     @Transactional
     public void save(Trainee trainee) {

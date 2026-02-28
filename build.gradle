@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'jacoco'
 }
 
 group = 'com.gym_project'
@@ -39,9 +40,16 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:2.0.9'
     implementation 'org.slf4j:slf4j-simple:2.0.9'
 
-    testImplementation 'junit:junit:4.13.2'
+    // Tests
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.springframework:spring-test:5.3.29'
+    testImplementation 'org.mockito:mockito-core:5.5.0'
 }
 
 application {
     mainClass = 'com.gym_project.AppRunner'
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
