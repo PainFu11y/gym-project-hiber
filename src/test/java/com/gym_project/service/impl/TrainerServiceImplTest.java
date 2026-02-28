@@ -166,6 +166,30 @@ class TrainerServiceImplTest {
     }
 
     @Test
+    void getUnassignedTrainersByTraineeUsername_shouldReturnMappedDtos() {
+        Trainer trainer1 = new Trainer();
+        trainer1.setUsername("trainer1");
+        trainer1.setFirstName("John");
+        trainer1.setLastName("Smith");
+
+        Trainer trainer2 = new Trainer();
+        trainer2.setUsername("trainer2");
+        trainer2.setFirstName("Mike");
+        trainer2.setLastName("Brown");
+
+        when(trainerRepository.findUnassignedTrainersByTraineeUsername("trainee1"))
+                .thenReturn(List.of(trainer1, trainer2));
+
+        List<TrainerResponseDto> result =
+                service.getUnassignedTrainersByTraineeUsername("trainee1");
+
+        assertEquals(2, result.size());
+        assertEquals("trainer1", result.get(0).getUsername());
+        assertEquals("trainer2", result.get(1).getUsername());
+    }
+
+
+    @Test
     void getTrainings_shouldReturnMappedDtos() {
         TrainerTrainingFilterDto filter = new TrainerTrainingFilterDto();
 
@@ -269,5 +293,86 @@ class TrainerServiceImplTest {
         assertEquals(2, result.size());
         assertEquals("t1", result.get(0).getUsername());
         assertEquals("t2", result.get(1).getUsername());
+    }
+
+    @Test
+    void create_shouldThrowIfFirstNameNull() {
+        TrainerCreateDto dto = new TrainerCreateDto();
+        dto.setLastName("Doe");
+        dto.setSpecialization("Strength");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                service.create(dto)
+        );
+
+        assertEquals("First name cannot be empty", ex.getMessage());
+    }
+
+    @Test
+    void create_shouldThrowIfFirstNameBlank() {
+        TrainerCreateDto dto = new TrainerCreateDto();
+        dto.setFirstName(" ");
+        dto.setLastName("Doe");
+        dto.setSpecialization("Strength");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                service.create(dto)
+        );
+
+        assertEquals("First name cannot be empty", ex.getMessage());
+    }
+
+    @Test
+    void create_shouldThrowIfLastNameNull() {
+        TrainerCreateDto dto = new TrainerCreateDto();
+        dto.setFirstName("John");
+        dto.setSpecialization("Strength");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                service.create(dto)
+        );
+
+        assertEquals("Last name cannot be empty", ex.getMessage());
+    }
+
+    @Test
+    void create_shouldThrowIfLastNameBlank() {
+        TrainerCreateDto dto = new TrainerCreateDto();
+        dto.setFirstName("John");
+        dto.setLastName(" ");
+        dto.setSpecialization("Strength");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                service.create(dto)
+        );
+
+        assertEquals("Last name cannot be empty", ex.getMessage());
+    }
+
+    @Test
+    void create_shouldThrowIfSpecializationNull() {
+        TrainerCreateDto dto = new TrainerCreateDto();
+        dto.setFirstName("John");
+        dto.setLastName("Doe");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                service.create(dto)
+        );
+
+        assertEquals("Specialization cannot be empty", ex.getMessage());
+    }
+
+    @Test
+    void create_shouldThrowIfSpecializationBlank() {
+        TrainerCreateDto dto = new TrainerCreateDto();
+        dto.setFirstName("John");
+        dto.setLastName("Doe");
+        dto.setSpecialization(" ");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                service.create(dto)
+        );
+
+        assertEquals("Specialization cannot be empty", ex.getMessage());
     }
 }
