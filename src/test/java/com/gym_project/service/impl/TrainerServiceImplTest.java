@@ -265,7 +265,7 @@ class TrainerServiceImplTest {
 
         service.deleteByUsername("john.doe");
 
-        verify(trainerRepository).delete(trainer);
+        verify(trainerRepository).deleteByUsername("john.doe");
     }
 
     @Test
