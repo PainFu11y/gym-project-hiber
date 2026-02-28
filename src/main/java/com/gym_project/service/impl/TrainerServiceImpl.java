@@ -42,7 +42,9 @@ public class TrainerServiceImpl implements TrainerService {
 
         String base = dto.getFirstName() + "." + dto.getLastName();
         List<String> existingUsernames = trainerRepository.findUsernamesStartingWith(base);
+
         String generatedUsername = UsernameGenerator.generate(dto.getFirstName(), dto.getLastName(), existingUsernames);
+        log.debug("Generated trainer username: {}", generatedUsername);
 
         Trainer trainer = TrainerMapper.toEntity(dto);
         trainer.setUsername(generatedUsername);
@@ -63,7 +65,11 @@ public class TrainerServiceImpl implements TrainerService {
         log.debug("Fetching trainer by username: {}", username);
 
         Trainer trainer = trainerRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+                .orElseThrow(() -> {
+                    log.warn("Trainer not found: {}", username);
+                    return new RuntimeException("Trainer not found");
+                });
+
         return TrainerMapper.toDto(trainer);
     }
 
@@ -84,7 +90,10 @@ public class TrainerServiceImpl implements TrainerService {
         validateUpdate(dto);
 
         Trainer trainer = trainerRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+                .orElseThrow(() -> {
+                    log.warn("Trainer not found for update: {}", username);
+                    return new RuntimeException("Trainer not found");
+                });
 
         TrainerMapper.updateEntity(trainer, dto);
 
@@ -100,8 +109,10 @@ public class TrainerServiceImpl implements TrainerService {
         log.info("Deleting trainer: {}", username);
 
         Trainer trainer = trainerRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Trainer not found"));
-        trainerRepository.delete(trainer);
+                .orElseThrow(() -> {
+                    log.warn("Trainer not found for deletion: {}", username);
+                    return new RuntimeException("Trainer not found");
+                });
 
         log.info("Trainer deleted: {}", username);
     }
@@ -112,7 +123,11 @@ public class TrainerServiceImpl implements TrainerService {
         log.info("Activating trainer: {}", username);
 
         Trainer trainer = trainerRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+                .orElseThrow(() -> {
+                    log.warn("Trainer not found for activation: {}", username);
+                    return new RuntimeException("Trainer not found");
+                });
+
         trainer.setActive(true);
         return TrainerMapper.toDto(trainer);
     }
@@ -123,7 +138,11 @@ public class TrainerServiceImpl implements TrainerService {
         log.info("Deactivating trainer: {}", username);
 
         Trainer trainer = trainerRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+                .orElseThrow(() -> {
+                    log.warn("Trainer not found for deactivation: {}", username);
+                    return new RuntimeException("Trainer not found");
+                });
+
         trainer.setActive(false);
         return TrainerMapper.toDto(trainer);
     }
@@ -135,8 +154,10 @@ public class TrainerServiceImpl implements TrainerService {
         log.info("Changing password for trainer: {}", username);
 
         if (newPassword == null || newPassword.isBlank()) {
+            log.warn("Attempt to set blank password for trainer: {}", username);
             throw new IllegalArgumentException("Password cannot be blank");
         }
+
         trainerRepository.changePassword(username, newPassword);
 
         log.info("Password changed successfully for trainer: {}", username);
@@ -160,6 +181,7 @@ public class TrainerServiceImpl implements TrainerService {
         log.debug("Fetching unassigned trainers for trainee: {}", traineeUsername);
 
         if (traineeUsername == null || traineeUsername.isBlank()) {
+            log.warn("Blank trainee username provided for unassigned trainers search");
             throw new IllegalArgumentException("Trainee username must not be blank");
         }
 
@@ -183,11 +205,15 @@ public class TrainerServiceImpl implements TrainerService {
         log.info("Updating trainers for trainee: {}", traineeUsername);
 
         if (traineeUsername == null || traineeUsername.isBlank()) {
+            log.warn("Blank trainee username in updateTraineeTrainers");
             throw new IllegalArgumentException("Trainee username must not be blank");
         }
 
         Trainee trainee = traineeRepository.findByUsername(traineeUsername)
-                .orElseThrow(() -> new RuntimeException("Trainee not found"));
+                .orElseThrow(() -> {
+                    log.warn("Trainee not found: {}", traineeUsername);
+                    return new RuntimeException("Trainee not found");
+                });
 
         if (trainee.getTrainers() != null) {
             for (Trainer trainer : trainee.getTrainers()) {
@@ -220,13 +246,18 @@ public class TrainerServiceImpl implements TrainerService {
         log.debug("Validating credentials for trainer: {}", username);
 
         Trainer trainer = trainerRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+                .orElseThrow(() -> {
+                    log.warn("Login failed - trainer not found: {}", username);
+                    return new RuntimeException("Trainer not found");
+                });
 
         if (!trainer.isActive()) {
+            log.warn("Login attempt for deactivated trainer: {}", username);
             throw new RuntimeException("Trainer is deactivated");
         }
 
         if (!trainer.getPassword().equals(password)) {
+            log.warn("Invalid password for trainer: {}", username);
             throw new RuntimeException("Invalid password");
         }
 

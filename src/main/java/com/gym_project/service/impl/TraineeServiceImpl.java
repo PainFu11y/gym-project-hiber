@@ -62,7 +62,10 @@ public class TraineeServiceImpl implements TraineeService {
         log.debug("Fetching trainee by username: {}", username);
 
         Trainee trainee = traineeRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Trainee not found"));
+                .orElseThrow(() -> {
+                    log.warn("Trainee not found: {}", username);
+                    return new RuntimeException("Trainee not found");
+                });
 
         return TraineeMapper.toDto(trainee);
     }
@@ -87,11 +90,14 @@ public class TraineeServiceImpl implements TraineeService {
         validateUpdate(dto);
 
         Trainee trainee = traineeRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Trainee not found"));
+                .orElseThrow(() -> {
+                    log.warn("Trainee not found for update: {}", username);
+                    return new RuntimeException("Trainee not found");
+                });
 
         TraineeMapper.updateEntity(trainee, dto);
 
-        log.info("Updating trainee: {}", username);
+        log.info("Trainee updated successfully: {}", username);
 
         return TraineeMapper.toDto(trainee);
     }
@@ -100,14 +106,18 @@ public class TraineeServiceImpl implements TraineeService {
     @PreAuthorize("#username == authentication.name")
     public void deleteByUsername(String username) {
 
-        log.info("Trainee updated successfully: {}", username);
+        log.info("Deleting trainee: {}", username);
 
         Trainee trainee = traineeRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Trainee not found"));
+                .orElseThrow(() -> {
+                    log.warn("Trainee not found for deletion: {}", username);
+                    return new RuntimeException("Trainee not found");
+                });
 
         traineeRepository.delete(trainee);
 
-        log.info("Deleting trainee: {}", username);
+        log.info("Trainee deleted: {}", username);
+
     }
 
     @Override
@@ -142,6 +152,7 @@ public class TraineeServiceImpl implements TraineeService {
         log.info("Changing password for trainee: {}", username);
 
         if (newPassword == null || newPassword.isBlank()) {
+            log.warn("Attempt to set blank password for trainee: {}", username);
             throw new IllegalArgumentException("Password cannot be blank");
         }
         traineeRepository.changePassword(username, newPassword);
@@ -166,13 +177,19 @@ public class TraineeServiceImpl implements TraineeService {
         log.debug("Validating credentials for trainee: {}", username);
 
         Trainee trainee = traineeRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Trainee not found"));
+                .orElseThrow(() -> {
+                    log.warn("Login failed - trainee not found: {}", username);
+                    return new RuntimeException("Trainee not found");
+                });
 
         if (!trainee.isActive()) {
+            log.warn("Login attempt for deactivated trainee: {}", username);
             throw new RuntimeException("Trainee is deactivated");
         }
 
+
         if (!trainee.getPassword().equals(password)) {
+            log.warn("Invalid password for trainee: {}", username);
             throw new RuntimeException("Invalid password");
         }
 
