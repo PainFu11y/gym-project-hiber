@@ -32,13 +32,13 @@ dependencies {
     // PostgreSQL
     runtimeOnly 'org.postgresql:postgresql:42.6.0'
 
-    // Logging
-    implementation 'org.slf4j:slf4j-api:2.0.9'
-    implementation 'ch.qos.logback:logback-classic:1.4.11'
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
     // Logging
     implementation 'org.slf4j:slf4j-api:2.0.9'
-    implementation 'org.slf4j:slf4j-simple:2.0.9'
+    implementation 'ch.qos.logback:logback-classic:1.4.11'
 
     // Tests
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
